@@ -4,10 +4,8 @@
 #
 # A* algorithm for Super Mario World
 # using RLE
+from time import sleep
 
-import sys
-import os
-import pickle
 import retro
 
 from rominfo import *
@@ -61,7 +59,7 @@ def melhor_filho(tree):
 
     # 2) Se o nó não tem filhos, retorna ele mesmo e seu f
     if not tree.filhos:
-        return (tree, tree.f)
+        return tree, tree.f
 
     # 3) Para cada filho de tree, aplica melhor_filho e filtra aqueles que resultarem em None
     f = [(x, melhor_filho(x)) for x in tree.filhos.values()]
@@ -72,7 +70,7 @@ def melhor_filho(tree):
         return None
 
     # 5) Caso contrário retorna aquele com o menor f
-    f.sort(key=lambda x: x[0].f)
+    f.sort(key=lambda x: x[1][1])
     return f[0][1]
 
 
@@ -81,7 +79,7 @@ def melhor_filho(tree):
 # chegar ao final da fase
 def heuristica(estado, x):
     #    return (4800 - x)/8
-    estNum = np.reshape(list(map(int, estado.split(','))), (2 * raio + 1, 2 * raio + 1))
+    estNum = np.reshape(estado, (2 * raio + 1, 2 * raio + 1))
     dist = np.abs(estNum[:raio + 1, raio + 2:raio + 7]).sum()
     return ((4800 - x) / 8) + 0.3 * dist
 
@@ -229,7 +227,7 @@ def astar():
 
     obj, acoes = atingiuObj(tree)
     mostrar = True
-    emula(acoes, mostrar)
+    emula(acoes, env, mostrar)
 
     return tree
 

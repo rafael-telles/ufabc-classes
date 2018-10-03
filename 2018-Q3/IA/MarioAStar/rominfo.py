@@ -114,7 +114,7 @@ def getInputs(ram, radius=6):
 # Recupera o estado atual como uma string
 def getState(ram, radius):
   state, x, y = getInputs(ram, radius=radius)
-  return ','.join(map(str,state)), x, y  
+  return state, x, y
   
 def getRam(env):
     ram = []

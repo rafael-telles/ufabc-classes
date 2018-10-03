@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <omp.h>
 
 int main(int argc, char const *argv[])
@@ -12,20 +14,28 @@ int main(int argc, char const *argv[])
 		a[i] = i;
 	}
 
-	omp_set_num_threads(4);
-	// omp_set_dynamic(1);
-	#pragma omp parallel default(none) shared(n, a) private(i)
-	{
-		int id = omp_get_thread_num();
 
-		int count = 0;
-		#pragma omp for
-		for(i=0; i<n; i++) {
-			printf("[%d] - %2d\n", id, i[a]);
-			count++;
+	long long sum = 0;
+	long long sum2 = 0;
+
+	#pragma omp parallel
+	{
+
+		#pragma omp for reduction(+:sum) reduction(+:sum2)
+		for (i = 0; i < n; i++) {
+			sum += a[i];
+			sum2 += a[i] * a[i];
 		}
-		printf("Fim [%d] - count: %d\n", id, count);
 	}
 
+	double mean = sum / (double) n;
+	double var = (sum2 - 2 * mean * sum + n * (mean*mean)) / n;
+	double stdev = sqrt(var);
+
+	printf("sum: %.2lld\n", sum);
+	printf("sum2: %.2lld\n", sum2);
+	printf("mean: %.2lf\n", mean);
+	printf("var: %.2lf\n", var);
+	printf("stdev: %.2lf\n", stdev);
 	return 0;
 }

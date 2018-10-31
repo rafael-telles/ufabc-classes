@@ -56,6 +56,7 @@ int main() {
 
     free(A);
     free(B);
+    free(C);
     fclose(in);
     fclose(out);
     return 0;

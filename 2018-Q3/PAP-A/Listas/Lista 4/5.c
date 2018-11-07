@@ -15,23 +15,24 @@ int main() {
     Am = (double*) calloc(m, sizeof(double));
     Amn = (double*) calloc(m * m, sizeof(double));
 
-    int i, j, k, l;
-    for(i = 0; i < n; i++){
-        for(j = 0; j < m; j++){
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
             fscanf(in, "%lf", &(A[i*m+j]));
         }
     }
 
-    for(k = 0; k < m; k++){
+    #pragma omp parallel for
+    for(int k = 0; k < m; k++){
         double am = 0;
-        for(i = 0; i < n; i++){
+        for(int i = 0; i < n; i++){
             am += A[i*m+k];
         }
         Am[k] = am / n;
 
-        for(l = 0; l < m; l++){
+        #pragma omp parallel for
+        for(int l = 0; l < m; l++){
             double amn = 0;
-            for(i = 0; i < n; i++){
+            for(int i = 0; i < n; i++){
                 amn += A[i*m+k] * A[i*m+l];
             }
             Amn[k*m+l] = amn / n;
@@ -39,18 +40,9 @@ int main() {
     }
 
     fprintf(out, "%d\n", m);
-    for(k = 0; k < m; k++){
-        for(l = 0; l < m; l++){
-
-            // 1/n * (sum (aik*ail) - sum(aik*al) - sum(ak*ail) + sum(ak*al))
-            // 1/n * (sum (aik*ail) - sum(aik*al) - sum(ak*ail) + n*ak*al)
-            // 1/n * (sum (aik*ail) - sum(ail)/n*sum(aik))
-
-            double Mkl = 0;
-            for(i = 0; i < n; i++){
-                Mkl += (Amn[i*m+k] - Am[k]) * (A[i*m+l] - Am[l]);
-            }
-            Mkl /= n;
+    for(int k = 0; k < m; k++){
+        for(int l = 0; l < m; l++){
+            double Mkl = Amn[k*m+l] - Am[k] * Am[l];
             fprintf(out, "%.2lf\t", Mkl);
         }
         fprintf(out, "\n");
